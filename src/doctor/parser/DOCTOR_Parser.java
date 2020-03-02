@@ -23,15 +23,27 @@ import doctor.parser.nodes.DOCTOR_Template;
  * @author gwandalf
  *
  */
-public class DOCTOR_Parser { // TODO : create and throw appropriate exceptions
+public class DOCTOR_Parser extends AbstractParser<String> { // TODO : create and throw appropriate exceptions
 	
-	private final String source;
 	private int offset = 0;
 	
 	private final List<Character> WS = Arrays.asList(' ','\r','\n','\t');
 	
-	public DOCTOR_Parser(String path) throws IOException {
-		source = new String ( Files.readAllBytes( Paths.get(path) ) );
+	public DOCTOR_Parser(String path) {
+		super(path);
+	}
+	
+	@Override
+	protected String loadSource(String path) {
+		String out;
+		try {
+			out = new String ( Files.readAllBytes( Paths.get(path) ) );
+			return out;
+		} catch (IOException e) {
+			// TODO : Throw appropriate exceptions
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/**
@@ -42,20 +54,20 @@ public class DOCTOR_Parser { // TODO : create and throw appropriate exceptions
 	 */
 	private boolean checkKeyword(String keyword) {
 		int startOffset = offset;
-		while(source.charAt(startOffset) != keyword.charAt(0)) {
-			if(source.charAt(startOffset) == '#') {
-				while(source.charAt(startOffset) != '\n') {
+		while(source().charAt(startOffset) != keyword.charAt(0)) {
+			if(source().charAt(startOffset) == '#') {
+				while(source().charAt(startOffset) != '\n') {
 					startOffset++;
 				}
 			}
-			if(!WS.contains(source.charAt(startOffset))) {
+			if(!WS.contains(source().charAt(startOffset))) {
 				return false;
 			}
 			startOffset++;
 		}
 		
 		for (int i = 0; i < keyword.length(); i++) {
-			if(source.charAt(startOffset+i) != keyword.charAt(i)) {
+			if(source().charAt(startOffset+i) != keyword.charAt(i)) {
 				return false;
 			}
 		}
@@ -68,24 +80,24 @@ public class DOCTOR_Parser { // TODO : create and throw appropriate exceptions
 	 * ignoreSpace : move offset to the next non-blank char
 	 */
 	private void ignoreSpace() {
-		while(WS.contains(source.charAt(offset))) {
+		while(WS.contains(source().charAt(offset))) {
 			offset++;
 		}
 	}
 	
 	/**
 	 * getBetween : return the string between start & end considering that offset is on start
-	 * @param start : the starting char (need to be the char at source[offset])
+	 * @param start : the starting char (need to be the char at source()[offset])
 	 * @param end : ending char, when found stop
 	 * @return the string between start and end
 	 */
 	private String getBetween(char start, char end) {
 		StringBuilder text = new StringBuilder();
-		if(source.charAt(offset) == start) {
+		if(source().charAt(offset) == start) {
 			offset++;
 			// TODO : check if not escaped
-			while(source.charAt(offset) != end) {
-				text.append(source.charAt(offset));
+			while(source().charAt(offset) != end) {
+				text.append(source().charAt(offset));
 				offset++;
 			}
 			offset++;
@@ -110,7 +122,7 @@ public class DOCTOR_Parser { // TODO : create and throw appropriate exceptions
 		return out;
 	}
 	
-	
+	@Override
  	public DOCTOR_Root parse() {
 		
 		List<DOCTOR_Import> imports = new ArrayList<>();
@@ -194,8 +206,8 @@ public class DOCTOR_Parser { // TODO : create and throw appropriate exceptions
 	private String parseID() {
 		ignoreSpace();
 		StringBuilder id = new StringBuilder();
-		while(source.charAt(offset) != '"') {
-			id.append(source.charAt(offset));
+		while(source().charAt(offset) != '"') {
+			id.append(source().charAt(offset));
 			offset++;
 		}
 		return id.toString();
@@ -224,7 +236,7 @@ public class DOCTOR_Parser { // TODO : create and throw appropriate exceptions
 		List<DOCTOR_Call> out = new ArrayList();
 		if(!checkKeyword("{")) return out;
 		ignoreSpace();
-		while(source.charAt(offset) != '}') {
+		while(source().charAt(offset) != '}') {
 			DOCTOR_Call c = parseCall();
 			out.add(c);
 			ignoreSpace();
@@ -243,4 +255,6 @@ public class DOCTOR_Parser { // TODO : create and throw appropriate exceptions
 			return new DOCTOR_DirectCall(id);
 		}
 	}
+
+	
 }
