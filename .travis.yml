@@ -1,0 +1,9 @@
+language: java
+git:
+	depth: 2
+	quiet: true
+	submodules: false
+branches:
+  only:
+  - master
+
