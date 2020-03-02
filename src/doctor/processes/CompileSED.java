@@ -118,15 +118,11 @@ public class CompileSED implements IVisitor {
 
 	@Override
 	public void visit(DOCTOR_Import node) {
-		try {
-			DOCTOR_Parser importParser = new DOCTOR_Parser(node.getURL());
-			DOCTOR_Root importTree = importParser.parse();
-			CompileSED compiler = new CompileSED();
-			importTree.accept(compiler);
-			allRules.addAll(compiler.allRules);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		DOCTOR_Parser importParser = new DOCTOR_Parser(node.getURL());
+		DOCTOR_Root importTree = importParser.parse();
+		CompileSED compiler = new CompileSED();
+		importTree.accept(compiler);
+		allRules.addAll(compiler.allRules);
 
 	}
 
@@ -233,18 +229,18 @@ public class CompileSED implements IVisitor {
 	 */
 	private Map<String,Integer> groupName(String rule){
 		int counter = 1;
-		var toName = -1;
-		var name = "";
+		int toName = -1;
+		String name = "";
 		
-		var escaped = false;
-		var closeBracket = false;
-		var namedGroup = false;
+		boolean escaped = false;
+		boolean closeBracket = false;
+		boolean namedGroup = false;
 		
 		String[] chars = rule.split("");
 		List<Integer> groupList = new ArrayList();
 		Map<String,Integer> table = new HashMap();
 		
-		for(var i = 0; i < chars.length;i++){
+		for(int i = 0; i < chars.length;i++){
 			
 			// End of named group
 			// save the name and position to table and reset name
