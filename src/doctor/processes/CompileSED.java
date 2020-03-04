@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import doctor.parser.DOCTOR_Parser;
+import doctor.parser.AbstractParser;
+import doctor.parser.GenericParser;
 import doctor.parser.nodes.DOCTOR_Call;
 import doctor.parser.nodes.DOCTOR_DirectCall;
 import doctor.parser.nodes.DOCTOR_Import;
@@ -85,16 +86,19 @@ public class CompileSED implements IVisitor {
 			post.accept(this);
 		}
 		
-		System.out.println("Compile imports");
-		for (DOCTOR_Import i : node.getImports()) {
-			i.accept(this);
+		if (node.getImports() != null) {
+			System.out.println("Compile imports");
+			for (DOCTOR_Import i : node.getImports()) {
+				i.accept(this);
+			}
 		}
 		
-		System.out.println("Process Rules");
-		for (DOCTOR_Rule r : node.getRules()) {
-			allRules.add(r);
-		}
-		
+		if (node.getRules() != null) {
+			System.out.println("Process Rules");
+			for (DOCTOR_Rule r : node.getRules()) {
+				allRules.add(r);
+			}
+		}		
 		
 		DOCTOR_Ordering order = node.getOrder();
 		if(order != null) {
@@ -118,15 +122,11 @@ public class CompileSED implements IVisitor {
 
 	@Override
 	public void visit(DOCTOR_Import node) {
-		try {
-			DOCTOR_Parser importParser = new DOCTOR_Parser(node.getURL());
-			DOCTOR_Root importTree = importParser.parse();
-			CompileSED compiler = new CompileSED();
-			importTree.accept(compiler);
-			allRules.addAll(compiler.allRules);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		GenericParser importParser = new GenericParser(node.getURL());
+		DOCTOR_Root importTree = importParser.parse();
+		CompileSED compiler = new CompileSED();
+		importTree.accept(compiler);
+		allRules.addAll(compiler.allRules);
 
 	}
 
@@ -233,18 +233,18 @@ public class CompileSED implements IVisitor {
 	 */
 	private Map<String,Integer> groupName(String rule){
 		int counter = 1;
-		var toName = -1;
-		var name = "";
+		int toName = -1;
+		String name = "";
 		
-		var escaped = false;
-		var closeBracket = false;
-		var namedGroup = false;
+		boolean escaped = false;
+		boolean closeBracket = false;
+		boolean namedGroup = false;
 		
 		String[] chars = rule.split("");
 		List<Integer> groupList = new ArrayList();
 		Map<String,Integer> table = new HashMap();
 		
-		for(var i = 0; i < chars.length;i++){
+		for(int i = 0; i < chars.length;i++){
 			
 			// End of named group
 			// save the name and position to table and reset name
