@@ -24,7 +24,7 @@ import doctor.parser.nodes.DOCTOR_Template;
 
 public class JSON_Parser extends AbstractParser<JSONObject> {
 
-	protected JSON_Parser(String path) {
+	public JSON_Parser(String path) {
 		super(path);
 	}
 

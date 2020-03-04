@@ -9,7 +9,7 @@ public abstract class AbstractParser<T> {
 	 * This abstract constructor load the source relying on specialized method
 	 * @param path
 	 */
-	protected AbstractParser(String path) {
+	public AbstractParser(String path) {
 		source = loadSource(path);
 	}
 	
